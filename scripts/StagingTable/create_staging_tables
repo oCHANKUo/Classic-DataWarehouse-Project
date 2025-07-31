@@ -1,0 +1,104 @@
+USE Staging;
+GO
+
+CREATE TABLE IndividualCustomer (
+    CustomerID INT,
+    Title NVARCHAR(8),
+    FirstName NVARCHAR(50),
+    MiddleName NVARCHAR(50),
+    LastName NVARCHAR(50),
+    Gender NVARCHAR(1),
+    PhoneNumber NVARCHAR(25),
+    PhoneNumberType NVARCHAR(50),
+    EmailAddress NVARCHAR(50),
+    EmailPromotion INT
+);
+
+CREATE TABLE Product (
+    ProductID INT,
+    Name NVARCHAR(50),
+    ProductNumber NVARCHAR(25),
+    MakeFlag BIT,
+    FinishedGoodsFlag BIT,
+    Color NVARCHAR(15),
+    SafetyStockLevel SMALLINT,
+    ReorderPoint SMALLINT,
+    StandardCost MONEY,
+    ListPrice MONEY,
+    Size NVARCHAR(5),
+    SizeUnitMeasureCode NCHAR(3),
+    Weight DECIMAL(8,2),
+    WeightUnitMeasureCode NCHAR(3),
+    ProductSubCategoryID INT
+);
+
+CREATE TABLE ProductCategory (
+    ProductCategoryID INT,
+    Name NVARCHAR(50),
+    ModifiedDate DATETIME
+);
+
+CREATE TABLE ProductSubCategory (
+    ProductSubCategoryID INT,
+    ProductCategoryID INT,
+    Name NVARCHAR(50),
+    ModifiedDate DATETIME
+);
+
+CREATE TABLE SalesOrderDetail (
+    SalesOrderID INT,
+    SalesOrderDetailID INT,
+    CarrierTrackingNumber NVARCHAR(25),
+    OrderQty INT,
+    ProductID INT,
+    UnitPrice MONEY,
+    UnitPriceDiscount MONEY,
+    LineTotal DECIMAL(38,6),
+    ModifiedDate DATETIME
+);
+
+CREATE TABLE SalesOrderHeader (
+    SalesOrderID INT,
+    OrderDate DATETIME,
+    DueDate DATETIME,
+    ShipDate DATETIME,
+    SalesOrderNumber NVARCHAR(25),
+    PurchaseOrderNumber NVARCHAR(25),
+    AccountNumber NVARCHAR(15),
+    CustomerID INT,
+    SalesPersonID INT,
+    TerritoryID INT,
+    SubTotal MONEY,
+    TaxAmt MONEY,
+    Freight MONEY,
+    TotalDue MONEY,
+    ModifiedDate DATETIME
+);
+
+CREATE TABLE SalesPerson (
+    BusinessEntityID INT,
+    TerritoryID INT,
+    SalesQuota MONEY,
+    Bonus MONEY,
+    CommissionPct SMALLMONEY,
+    SalesYTD MONEY,
+    SalesLastYear MONEY
+);
+
+CREATE TABLE SalesTerritory (
+    TerritoryID INT,
+    Name NVARCHAR(50),
+    CountryRegionCode NVARCHAR(3),
+    RegionGroup NVARCHAR(50)
+);
+
+CREATE TABLE CustomerAddress (
+    CustomerID INT,
+    AddressType NVARCHAR(50),
+    AddressLine1 NVARCHAR(50),
+    AddressLine2 NVARCHAR(50),
+    City NVARCHAR(50),
+    StateProvinceName NVARCHAR(50),
+    PostalCode NVARCHAR(50),
+    CountryRegionName NVARCHAR(50)
+);
