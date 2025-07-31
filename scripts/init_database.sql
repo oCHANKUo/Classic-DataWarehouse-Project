@@ -1,0 +1,3 @@
+CREATE DATABASE DataWarehouseClassic;
+GO
+CREATE DATABASE Staging;
