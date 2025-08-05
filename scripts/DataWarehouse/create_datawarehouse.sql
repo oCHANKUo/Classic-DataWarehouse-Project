@@ -1,40 +1,34 @@
+/*
+===============================================================================================
+ Title       : create_datawarehouse.sql
+ Description : This script creates the full dimensional model (star schema) for the 
+               DataWarehouseClassic project. It includes dimension tables, a fact table,
+               and a detailed time dimension.
+
+ Tables Created:
+   - DimCustomer
+   - DimProduct
+   - DimSalesPerson
+   - DimTerritory
+   - DimDate
+   - FactSalesOrderDetail
+   - FactSalesOrderDetail references all dimension tables through foreign keys.
+===============================================================================================
+*/
+
+
 USE DataWarehouseClassic
 GO
--- ===Fact Table===============================================
--- Create FactSalesOrderDetail table
-IF OBJECT_ID('FactSalesOrderDetail', 'U') IS NOT NULL
-    DROP TABLE FactSalesOrderDetail;
-
-CREATE TABLE FactSalesOrderDetail (
-    SalesOrderDetailID INT PRIMARY KEY,
-    SalesOrderID INT,
-    ProductID INT,
-    CustomerID INT,
-    SalesPersonID NVARCHAR(5),
-    TerritoryID INT,
-    OrderDateKey INT,
-    DueDateKey INT,
-    ShipDateKey INT,
-    CarrierTrackingNumber NVARCHAR(50),
-    OrderQTY INT,
-    UnitPrice MONEY,
-    UnitPriceDiscount MONEY,
-    LineTotal DECIMAL(18,2),
-    Freight MONEY,
-    TaxAmt MONEY,
-    TotalDue MONEY
-);
 
 -- ==Dimension Tables============================================
-
-
 
 -- Create DimCustomer Table
 IF OBJECT_ID('DimCustomer', 'U') IS NOT NULL
     DROP TABLE DimCustomer;
 
 CREATE TABLE DimCustomer (
-    CustomerID INT PRIMARY KEY,
+	CustomerKey INT IDENTITY(1,1) PRIMARY KEY, -- Surrogate key
+    CustomerID INT,
     FullName NVARCHAR(100),
     Title NVARCHAR(10),
     Gender NVARCHAR(10),
@@ -49,7 +43,7 @@ CREATE TABLE DimCustomer (
     CountryRegionName NVARCHAR(50),
     EmailPromotion NVARCHAR(25)
 );
--- ======================================
+GO
 
 
 -- Create DimProduct table
@@ -57,19 +51,24 @@ IF OBJECT_ID('DimProduct', 'U') IS NOT NULL
     DROP TABLE DimProduct;
 
 CREATE TABLE DimProduct (
-    ProductID INT PRIMARY KEY,
+	ProductKey INT IDENTITY(1,1) PRIMARY KEY,
+    ProductID INT,
     ProductName NVARCHAR(50),
     ProductNumber NVARCHAR(25),
     Color NVARCHAR(20),
+	SizeValue DECIMAL(10,2) NULL,
+	SizeLabel NVARCHAR(10) NULL,
     Size NVARCHAR(10),
 	SizeUnitMeasureCode NVARCHAR(10),
     StandardCost MONEY,
     ListPrice MONEY,
     Weight NVARCHAR(10),
 	WeightUnitMeasureCode NVARCHAR(10),
+	WeightInGrams DECIMAL(10,3) NULL,
     CategoryName NVARCHAR(50),
     SubCategoryName NVARCHAR(50)
 );
+GO
 
 
 
@@ -78,7 +77,8 @@ IF OBJECT_ID('DimSalesPerson', 'U') IS NOT NULL
     DROP TABLE DimSalesPerson;
 
 CREATE TABLE DimSalesPerson (
-    SalesPersonID INT PRIMARY KEY,
+	SalesPersonKey INT IDENTITY(1,1) PRIMARY KEY, -- Surrogate
+    SalesPersonID INT,
     TerritoryID NVARCHAR(15),
     SalesQuota MONEY,
     Bonus MONEY,
@@ -86,6 +86,7 @@ CREATE TABLE DimSalesPerson (
     SalesYTD MONEY,
     SalesLastYear MONEY
 );
+GO
 
 
 -- Create DimTerritory Table
@@ -93,12 +94,13 @@ IF OBJECT_ID('DimTerritory', 'U') IS NOT NULL
     DROP TABLE DimTerritory;
 
 CREATE TABLE DimTerritory (
-    TerritoryID INT PRIMARY KEY,
+	TerritoryKey INT IDENTITY(1,1) PRIMARY KEY,  -- Surrogate
+    TerritoryID INT,
     TerritoryName NVARCHAR(50),
     CountryRegionCode NVARCHAR(10),
     RegionGroup NVARCHAR(50)
 );
-
+GO
 
 
 -- Create DimDate table
@@ -339,6 +341,42 @@ BEGIN
 	SET @CurrentDate = DATEADD(DD, 1, @CurrentDate)
 END
 
-/********************************************************************************************/
- 
-/*****************************************************************************************/
+
+-- ===Fact Table===============================================
+
+-- Create FactSalesOrderDetail table
+IF OBJECT_ID('FactSalesOrderDetail', 'U') IS NOT NULL
+    DROP TABLE FactSalesOrderDetail;
+
+CREATE TABLE FactSalesOrderDetail (
+	FactSalesOrderDetailKey INT IDENTITY(1,1) PRIMARY KEY, -- Surrogate
+    SalesOrderDetailID INT,
+    SalesOrderID INT,
+    ProductKey INT,           -- FK to DimProduct
+    CustomerKey INT,          -- FK to DimCustomer
+    SalesPersonKey INT,       -- FK to DimSalesPerson
+    TerritoryKey INT,         -- FK to DimTerritory
+
+    OrderDateKey INT,         -- FK to DimDate
+    DueDateKey INT,           -- FK to DimDate
+    ShipDateKey INT,          -- FK to DimDate
+
+    CarrierTrackingNumber NVARCHAR(50),
+    OrderQTY INT,
+    UnitPrice MONEY,
+    UnitPriceDiscount MONEY,
+    LineTotal DECIMAL(18,2),
+    Freight MONEY,
+    TaxAmt MONEY,
+    TotalDue MONEY
+
+	-- Foreign keys
+    FOREIGN KEY (ProductKey) REFERENCES DimProduct(ProductKey),
+    FOREIGN KEY (CustomerKey) REFERENCES DimCustomer(CustomerKey),
+    FOREIGN KEY (SalesPersonKey) REFERENCES DimSalesPerson(SalesPersonKey),
+    FOREIGN KEY (TerritoryKey) REFERENCES DimTerritory(TerritoryKey),
+    FOREIGN KEY (OrderDateKey) REFERENCES DimDate(DateKey),
+    FOREIGN KEY (DueDateKey) REFERENCES DimDate(DateKey),
+    FOREIGN KEY (ShipDateKey) REFERENCES DimDate(DateKey)
+);
+GO
