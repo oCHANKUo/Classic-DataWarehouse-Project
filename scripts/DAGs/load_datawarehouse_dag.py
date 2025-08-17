@@ -1,3 +1,18 @@
+"""
+DAG Name: load_datawarehouse_dag
+Description:
+    This Apache Airflow DAG orchestrates the ETL process for a SQL Server–based data warehouse.
+    It executes two stored procedures sequentially:
+        1. load_staging       → Loads data into staging tables.
+        2. load_datawarehouse → Transfers and transforms data into the data warehouse.
+
+Key Details:
+    - Retries: 1 (with 2-minute delay between retries)
+    - Schedule: None (manual trigger only)
+    - Catchup: Disabled
+    - Tags: ['datawarehouse', 'etl']
+    - load_staging must complete successfully before load_datawarehouse runs.
+"""
 from airflow import DAG
 from airflow.providers.microsoft.mssql.operators.mssql import MsSqlOperator
 from datetime import datetime, timedelta
